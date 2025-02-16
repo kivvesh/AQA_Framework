@@ -1,0 +1,61 @@
+stages:
+  - tests
+  - reports
+
+tests:
+  stage: tests
+  image: python:3.13
+  before_script:
+    - apt-get update && apt-get install -y wget gnupg2
+    - wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
+    - echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list
+    - apt-get update && apt-get install -y google-chrome-stable
+    - pip install -r requirements.txt
+  script:
+    - set +e
+    - pytest --headless True --stand prod -m prod
+    - pytest --headless True --stand stage -m stage
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - when: manual
+  tags:
+    - concept
+  allow_failure: true # Это позволит нам продолжить выполнение пайплайна в случае, если тесты упали.
+  artifacts:
+    paths:
+      - logs/*.log
+      - allure-results
+    expire_in: 1 week
+    when: always
+
+
+generate_report:
+  stage: reports
+  image: maven:3.5-jdk-8
+  script:
+    - apt update && mkdir allure && cd allure && wget https://github.com/allure-framework/allure2/releases/download/2.32.0/allure-2.32.0.zip
+    - apt install unzip -y
+    - unzip allure-2.32.0.zip
+    - export PATH="$CI_PROJECT_DIR/allure/allure-2.32.0/bin:$PATH"
+    - cd .. && allure generate --single-file -c ./allure-results -o ./allure-report
+  artifacts:
+      paths:
+        - ./allure-results
+        - ./allure-report
+      expire_in: 1 day
+  needs:
+    - tests
+  tags:
+    - concept
+
+
+send_report:
+  stage: reports
+  image: python:3.13
+  script:
+    - mv ./allure-report/index.html ./allure-report/report.html
+    - python3 send_allure.py
+  needs:
+    - generate_report
+  tags:
+    - concept

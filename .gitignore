@@ -1,0 +1,8 @@
+.venv/
+venv/
+data/**/*png
+logs/*log
+.idea/
+__pycache__/
+allure-report/
+allure-results/

@@ -67,7 +67,7 @@ def mylogger(request):
 
 
 @allure.title('Получение сессии браузера')
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='function')
 def browser(request):
     browser_name = request.config.getoption("--browser")
     browser_options = {

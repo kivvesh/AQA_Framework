@@ -21,11 +21,10 @@ class BasePage:
     """Базовый класс со всеми общими ui действиями в браузерами"""
     path = ''
 
-    def __init__(self, base_url:str, browser:WebDriver, logger:Logger, tg_bot:TelegramBot):
+    def __init__(self, base_url:str, browser:WebDriver, logger:Logger):
         self.browser = browser
         self.logger = logger
         self.base_url = base_url
-        self.tg_bot = tg_bot
 
     @allure.step('Переход по url')
     def get_corrent_path(self):
@@ -66,7 +65,6 @@ class BasePage:
             return element
         except Exception as error:
             self.logger.error(f'{name_action}\n{error}')
-            self.tg_bot.send_error(f'Тест - {test_name}, url - {self.browser.current_url}')
             self.send_screenshot_with_message_to_tg(name_action)
             allure.attach(
                 self.browser.get_screenshot_as_png(),
@@ -88,7 +86,6 @@ class BasePage:
         except Exception as error:
             self.logger.error(f'{test_name} {self.__class__.__doc__} Элементы с локатором {locator} не найдены')
             self.logger.error(f'{name_action}\n{error}')
-            self.tg_bot.send_error(f'Тест - {test_name}, url - {self.browser.current_url}')
             self.send_screenshot_with_message_to_tg(name_action)
             allure.attach(
                 self.browser.get_screenshot_as_png(),
@@ -109,7 +106,6 @@ class BasePage:
         except Exception as error:
             self.logger.error(f'{test_name} {self.__class__.__doc__} Элементы с локатором {locator} не найдены')
             self.logger.error(f'{name_action}\n{error}')
-            self.tg_bot.send_error(f'Тест - {test_name}, url - {self.browser.current_url}')
             self.send_screenshot_with_message_to_tg(name_action)
             allure.attach(
                 self.browser.get_screenshot_as_png(),
@@ -135,7 +131,6 @@ class BasePage:
             self.logger.debug(f'{name_action}')
         except Exception as error:
             self.logger.error(f'{name_action}\n{error}')
-            self.tg_bot.send_error(f'Тест - {test_name}, url - {self.browser.current_url}')
             self.send_screenshot_with_message_to_tg(name_action)
             allure.attach(
                 self.browser.get_screenshot_as_png(),
@@ -162,7 +157,6 @@ class BasePage:
             self.logger.debug(f'{name_action}')
         except Exception as error:
             self.logger.error(f'{name_action}\n{error}')
-            self.tg_bot.send_error(f'Тест - {test_name}, url - {self.browser.current_url}')
             self.send_screenshot_with_message_to_tg(name_action)
             allure.attach(
                 self.browser.get_screenshot_as_png(),
@@ -218,7 +212,6 @@ class BasePage:
                 time.sleep(timeout)
                 if point >= finish:
                     self.logger.error(f'{name_action}\n{error}')
-                    self.tg_bot.send_error(f'Тест - {test_name}, url - {self.browser.current_url}')
                     self.send_screenshot_with_message_to_tg(name_action)
                     allure.attach(
                         self.browser.get_screenshot_as_png(),
@@ -276,9 +269,6 @@ class BasePage:
                     self.logger.error(
                         f'{name_action}, status - {status}, url - {response.get("url")}'
                     )
-                    self.tg_bot.send_error(
-                        f'{name_action}, status - {status}, url - {response.get("url")}'
-                    )
                     pytest.fail(f'status - {status}, url - {response.get("url")}')
 
     def send_screenshot_with_message_to_tg(self, message):
@@ -286,7 +276,6 @@ class BasePage:
         name_action = f'{self.send_screenshot_with_message_to_tg.__doc__} {message}'
         screenshot = self.browser.get_screenshot_as_png()
         photo = io.BytesIO(screenshot)
-        self.tg_bot.send_photo_with_message(photo, message)
         self.logger.debug(name_action)
 
 

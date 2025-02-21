@@ -44,3 +44,11 @@ class Product(BasePage):
             5
         )
         return [element.text for element in list_products]
+
+    def product_in_basket_by_name(self, name):
+        """Добавление товара в корзину"""
+        test_name = self.product_in_basket_by_name.__doc__
+        self.click_after_detect_element(
+            (By.XPATH,f'//div[div[a[div[contains(text(), "{name}")]]]]//button'),
+            test_name,5
+        )

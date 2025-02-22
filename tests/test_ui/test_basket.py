@@ -47,7 +47,6 @@ def test_are_products_after_reload_page(browser,config, mylogger,name_cart):
 @allure.story('Basket')
 @allure.title('Проверка наличия-отсутствие добавленных\удаленных товаров в корзине после перезагрузки')
 @pytest.mark.ui
-@pytest.mark.test
 @pytest.mark.parametrize(
     'name_cart',[
         'Sauce Labs Backpack',

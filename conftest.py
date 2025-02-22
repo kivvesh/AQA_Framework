@@ -9,6 +9,8 @@ from selenium import webdriver
 from dotenv import dotenv_values
 from datetime import datetime
 from uuid import uuid4
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
 
 from core import Logger, TelegramBot, delete_files_in_dir
 from settings import ROOT_DIR
@@ -50,6 +52,10 @@ def pytest_addoption(parser):
                      help="Браузер для запуска тестов")
     parser.addoption("--headless", action="store", default=False,
                      help="Включение headless режиме")
+    parser.addoption("--selenoid", action="store", default=False,
+                     help="Запуск на selenoid")
+    parser.addoption("--executer", action="store", default='http://selenoid:4444/',
+                     help="URL selenoid")
 
 @allure.title('Получение конфигурционного файла для тестов')
 @pytest.fixture(scope='session', autouse=True)
@@ -70,6 +76,7 @@ def mylogger(request):
 @pytest.fixture(scope='function')
 def browser(request):
     browser_name = request.config.getoption("--browser")
+    executer_url = f'{request.config.getoption("--executer")}wd/hub'
     browser_options = {
         '--headless': request.config.getoption('--headless'),
         '--disable-gpu': request.config.getoption('--headless'),
@@ -79,7 +86,22 @@ def browser(request):
     }
     user_data_dir = os.path.join(os.getcwd(), f"user_data_{str(uuid4())}")
     os.makedirs(user_data_dir, exist_ok=True)
+    if request.config.getoption('--selenoid'):
+        options = ChromeOptions()
+        caps = {
+            "browserName": browser_name,
+            "selenoid:options": {
+                "enableLog": False,
+                "name": request.node.name
+            }
+        }
+        for key, value in caps.items():
+            options.set_capability(key, value)
 
+        driver = webdriver.Remote(
+            command_executor=executer_url,
+            options=options
+        )
     if browser_name == 'chrome':
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument(f"--user-data-dir={user_data_dir}")

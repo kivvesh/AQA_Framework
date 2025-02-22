@@ -25,6 +25,7 @@ class BaseApi:
         if response.status_code != 200:
             self.logger.error(doc)
             pytest.fail(doc)
+        return response
 
     @allure.step("Проверка размерности объекта")
     def check_len_body(self,iter_object:list, number:int):

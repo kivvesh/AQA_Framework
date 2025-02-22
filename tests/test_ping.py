@@ -14,6 +14,5 @@ from src.api.base_api import BaseApi
 def test_ping_stand(config, mylogger):
     """Пинг сервиса"""
     ui_stand = BaseApi(base_url=config.get('UI_URL'), logger=mylogger)
-    ui_stand.ping_stand(config.get('UI_URL'))
-    assert True
-
+    response = ui_stand.ping_stand(config.get('UI_URL'))
+    assert response.status_code == 200,'Стенд не доступен'

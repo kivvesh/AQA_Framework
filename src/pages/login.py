@@ -1,9 +1,13 @@
+import allure
+
 from selenium.webdriver.common.by import By
 
 from src.pages.base_page import BasePage
 
 class Login(BasePage):
     path=''
+
+    @allure.step('Авторизация пользователя')
     def login(self,user,password):
         """Авторизация пользователя"""
         test_name = self.login.__doc__
@@ -24,6 +28,7 @@ class Login(BasePage):
         )
         assert self.is_element((By.XPATH,'//div[@id="inventory_container"]'),5)
 
+    @allure.step('Выход пользователя из системы')
     def logout(self):
         """Выход пользователя"""
         test_name = self.logout.__doc__

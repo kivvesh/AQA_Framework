@@ -1,1 +1,2 @@
-from models.user import ResponseDataUser
+from models.user import (
+    ResponseDataUser, ResponsePostUser)

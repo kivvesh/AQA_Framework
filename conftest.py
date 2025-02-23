@@ -102,17 +102,18 @@ def browser(request):
             command_executor=executer_url,
             options=options
         )
-    if browser_name == 'chrome':
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument(f"--user-data-dir={user_data_dir}")
-        for key, value in browser_options.items():
-            if str(value) == 'True':
-                chrome_options.add_argument(key)
-        chrome_options.set_capability(
-            "goog:loggingPrefs", {"performance": "ALL", "browser": "ALL"}
-        )
-        driver = webdriver.Chrome(options=chrome_options)
-        driver.execute_cdp_cmd('Network.enable', {})
+    else:
+        if browser_name == 'chrome':
+            chrome_options = webdriver.ChromeOptions()
+            chrome_options.add_argument(f"--user-data-dir={user_data_dir}")
+            for key, value in browser_options.items():
+                if str(value) == 'True':
+                    chrome_options.add_argument(key)
+            chrome_options.set_capability(
+                "goog:loggingPrefs", {"performance": "ALL", "browser": "ALL"}
+            )
+            driver = webdriver.Chrome(options=chrome_options)
+            driver.execute_cdp_cmd('Network.enable', {})
 
     driver.implicitly_wait(1)
     driver.set_window_size(1920,1080)

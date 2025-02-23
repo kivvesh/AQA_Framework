@@ -7,8 +7,8 @@ from core.send_report import TelegramBot
 
 
 def send_report():
-    config = dotenv_values(os.path.join(ROOT_DIR, 'configs', '.env'))
-    bot = TelegramBot(config.get('TOKEN_TG'), config.get('CHANNEL_ID'))
+    config = dotenv_values(os.path.join(ROOT_DIR, "configs", ".env"))
+    bot = TelegramBot(config.get("TOKEN_TG"), config.get("CHANNEL_ID"))
     bot.send_allure()
 
 

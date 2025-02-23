@@ -16,11 +16,8 @@ from core import Logger, TelegramBot, delete_files_in_dir
 from settings import ROOT_DIR
 
 
-results = {
-    'passed': [],
-    'failed': [],
-    "skipped": []
-}
+results = {"passed": [], "failed": [], "skipped": []}
+
 
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
@@ -29,94 +26,98 @@ def pytest_runtest_makereport(item, call):
 
     # Получаем информацию о тесте
     test_info = {
-        'name': item.name,
-        'docstring': item.function.__doc__,
-        'outcome': report.outcome,
-        'duration': report.duration,
-        'report': report.longrepr,
+        "name": item.name,
+        "docstring": item.function.__doc__,
+        "outcome": report.outcome,
+        "duration": report.duration,
+        "report": report.longrepr,
     }
 
     # Сохраняем результаты в соответствующий список
     if report.outcome == "passed":
-        results['passed'].append(test_info)
+        results["passed"].append(test_info)
     elif report.outcome == "failed":
-        results['failed'].append(test_info)
+        results["failed"].append(test_info)
     elif report.outcome == "skipped":
-        results['skipped'].append(test_info)
+        results["skipped"].append(test_info)
     item.report = report
 
-def pytest_addoption(parser):
-    parser.addoption("--level_log", action="store", default="DEBUG",
-                     help="Уровень логирования")
-    parser.addoption("--browser", action="store", default="chrome",
-                     help="Браузер для запуска тестов")
-    parser.addoption("--headless", action="store", default=False,
-                     help="Включение headless режиме")
-    parser.addoption("--selenoid", action="store", default=False,
-                     help="Запуск на selenoid")
-    parser.addoption("--executer", action="store", default='http://selenoid:4444/',
-                     help="URL selenoid")
 
-@allure.title('Получение конфигурционного файла для тестов')
-@pytest.fixture(scope='session', autouse=True)
+def pytest_addoption(parser):
+    parser.addoption(
+        "--level_log", action="store", default="DEBUG", help="Уровень логирования"
+    )
+    parser.addoption(
+        "--browser", action="store", default="chrome", help="Браузер для запуска тестов"
+    )
+    parser.addoption(
+        "--headless", action="store", default=False, help="Включение headless режиме"
+    )
+    parser.addoption(
+        "--selenoid", action="store", default=False, help="Запуск на selenoid"
+    )
+    parser.addoption(
+        "--executer",
+        action="store",
+        default="http://selenoid:4444/",
+        help="URL selenoid",
+    )
+
+
+@allure.title("Получение конфигурционного файла для тестов")
+@pytest.fixture(scope="session", autouse=True)
 def config(request):
-    config = dotenv_values(os.path.join(ROOT_DIR,'configs','.env'))
+    config = dotenv_values(os.path.join(ROOT_DIR, "configs", ".env"))
     return config
 
 
-@allure.title('Получение объекта Logger')
-@pytest.fixture(scope='session')
+@allure.title("Получение объекта Logger")
+@pytest.fixture(scope="session")
 def mylogger(request):
-    level = request.config.getoption('--level_log').upper()
-    logger = Logger('AutoTests', level)
+    level = request.config.getoption("--level_log").upper()
+    logger = Logger("AutoTests", level)
     return logger.get_logger()
 
 
-@allure.title('Получение сессии браузера')
-@pytest.fixture(scope='function')
+@allure.title("Получение сессии браузера")
+@pytest.fixture(scope="function")
 def browser(request):
     browser_name = request.config.getoption("--browser")
-    executer_url = f'{request.config.getoption("--executer")}wd/hub'
+    executer_url = f"{request.config.getoption('--executer')}wd/hub"
     browser_options = {
-        '--headless': request.config.getoption('--headless'),
-        '--disable-gpu': request.config.getoption('--headless'),
-        '--window-size=1920,1080': request.config.getoption('--headless'),
-        '--no-sandbox': request.config.getoption('--headless'),
-        '--disable-dev-shm-usage': request.config.getoption('--headless'),
+        "--headless": request.config.getoption("--headless"),
+        "--disable-gpu": request.config.getoption("--headless"),
+        "--window-size=1920,1080": request.config.getoption("--headless"),
+        "--no-sandbox": request.config.getoption("--headless"),
+        "--disable-dev-shm-usage": request.config.getoption("--headless"),
     }
     user_data_dir = os.path.join(os.getcwd(), f"user_data_{str(uuid4())}")
     os.makedirs(user_data_dir, exist_ok=True)
-    if request.config.getoption('--selenoid'):
+    if request.config.getoption("--selenoid"):
         options = ChromeOptions()
         caps = {
             "browserName": browser_name,
-            "selenoid:options": {
-                "enableLog": False,
-                "name": request.node.name
-            }
+            "selenoid:options": {"enableLog": False, "name": request.node.name},
         }
         for key, value in caps.items():
             options.set_capability(key, value)
 
-        driver = webdriver.Remote(
-            command_executor=executer_url,
-            options=options
-        )
+        driver = webdriver.Remote(command_executor=executer_url, options=options)
     else:
-        if browser_name == 'chrome':
+        if browser_name == "chrome":
             chrome_options = webdriver.ChromeOptions()
             chrome_options.add_argument(f"--user-data-dir={user_data_dir}")
             for key, value in browser_options.items():
-                if str(value) == 'True':
+                if str(value) == "True":
                     chrome_options.add_argument(key)
             chrome_options.set_capability(
                 "goog:loggingPrefs", {"performance": "ALL", "browser": "ALL"}
             )
             driver = webdriver.Chrome(options=chrome_options)
-            driver.execute_cdp_cmd('Network.enable', {})
+            driver.execute_cdp_cmd("Network.enable", {})
 
     driver.implicitly_wait(1)
-    driver.set_window_size(1920,1080)
+    driver.set_window_size(1920, 1080)
 
     yield driver
 
@@ -144,14 +145,12 @@ def browser(request):
 
 
 @allure.title("Подготовка данных перед 1 сценарием")
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def data_for_1_scenario(config):
     user_data = {
-        "email": config.get('NEW_EMAIL_USER'),
-        "password": config.get('NEW_PASSWORD_USER'),
-        "full_name": config.get('NEW_FULLNAME_USER'),
+        "email": config.get("NEW_EMAIL_USER"),
+        "password": config.get("NEW_PASSWORD_USER"),
+        "full_name": config.get("NEW_FULLNAME_USER"),
     }
-    data = {
-        "new_user":user_data
-    }
+    data = {"new_user": user_data}
     return data

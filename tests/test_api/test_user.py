@@ -7,9 +7,7 @@ from src.api import User
 @allure.suite("API")
 @allure.feature("API")
 @allure.story("User")
-@allure.title(
-    "Проверка наличия-отсутствие добавленных\удаленных товаров в корзине после перезагрузки"
-)
+@allure.title("Проверка получения списка пользователей")
 @pytest.mark.api
 def test_get_list_users(mylogger, config):
     """Проверка получения списка пользователей"""

@@ -13,7 +13,7 @@ from src.pages import Product, Login
 @pytest.mark.parametrize(
     'name_cart',[
         'Sauce Labs Backpack',
-        'Sauce Labs Bolt T-Shirt',
+        'Sauce Labs Bolt T-ShirtTESTTEST',
         'Sauce Labs Bike Light',
     ]
 )

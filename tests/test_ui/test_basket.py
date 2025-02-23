@@ -5,7 +5,6 @@ import time
 from src.pages import Product, Login, Basket
 
 
-
 @allure.suite('UI')
 @allure.feature('UI')
 @allure.story('Basket')
